@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #18181b;
+  --card-foreground: #fafafa;
+  --border: #27272a;
+  --accent-orange: #f97316;
+  --accent-orange-hover: #ea580c;
+  --accent-glow: rgba(249, 115, 22, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  color: var(--foreground);
+  background-color: var(--background);
+  min-height: 100vh;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-x: hidden;
+}
+
+/* Custom scrollbars for a polished dark-mode feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* Glassmorphism surfaces */
+.glass-panel {
+  background: rgba(24, 24, 27, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(39, 39, 42, 0.8);
+}
+
+.glow-card {
+  box-shadow: 0 0 25px -5px rgba(249, 115, 22, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.orange-gradient-text {
+  background: linear-gradient(135deg, #fff 30%, #f97316 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
