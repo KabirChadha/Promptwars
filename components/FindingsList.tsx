@@ -1,13 +1,34 @@
 import React from "react";
 import { Finding } from "@/lib/types";
-import { AlertCircle, AlertTriangle, Info, ArrowUpRight } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info, ArrowUpRight, LucideIcon } from "lucide-react";
 
-interface FindingsListProps {
+/**
+ * Interface defining properties for the FindingsList component.
+ */
+export interface FindingsListProps {
+  /** Array of statutory and occupational safety findings. */
   findings: Finding[];
 }
 
-export function FindingsList({ findings }: FindingsListProps) {
-  const getSeverityBadge = (severity: Finding["severity"]) => {
+/**
+ * FindingsList Component
+ *
+ * Renders categorized statutory non-compliance and health hazard findings
+ * with severity badges, UN SDG references, and actionable remediation strategies.
+ *
+ * @param props - Component configuration properties adhering to {@link FindingsListProps}.
+ * @returns The rendered findings list interface.
+ */
+export function FindingsList({ findings }: FindingsListProps): React.JSX.Element {
+  const getSeverityBadge = (
+    severity: Finding["severity"]
+  ): {
+    label: string;
+    bg: string;
+    border: string;
+    text: string;
+    icon: LucideIcon;
+  } => {
     switch (severity) {
       case "high":
         return {
@@ -38,7 +59,7 @@ export function FindingsList({ findings }: FindingsListProps) {
 
   return (
     <div className="space-y-4">
-      {findings.map((item, index) => {
+      {findings.map((item: Finding, index: number) => {
         const badge = getSeverityBadge(item.severity);
         const IconComponent = badge.icon;
 
@@ -89,4 +110,5 @@ export function FindingsList({ findings }: FindingsListProps) {
     </div>
   );
 }
+
 export default FindingsList;

@@ -15,16 +15,24 @@
  *    - Multilingual Explanations & UN SDG-8 Alignment
  */
 
-// 1. Industry switching
+/**
+ * Supported industry sector domains for dynamic compliance adaptation.
+ */
 export type Industry = 'construction' | 'campus';
 
-// 2. Dual-user perspectives
+/**
+ * User perspective persona toggles between individual worker and plant management.
+ */
 export type UserRole = 'worker' | 'employer';
 
-// 3. Multilingual representations
+/**
+ * Supported ISO language codes for vernacular summaries and localized UI.
+ */
 export type Language = 'en' | 'hi' | 'ta';
 
-// 4. Worker Payload
+/**
+ * Structured input payload capturing worker profile, shift parameters, and raw grievance notes.
+ */
 export interface WorkerPayload {
   workerId: string;
   workerName: string;
@@ -39,7 +47,9 @@ export interface WorkerPayload {
   acquiredSkills: string[];
 }
 
-// 5. Payslip Detail
+/**
+ * Breakdown of itemized statutory pay, overtime multiplier, and plain-language vernacular summaries.
+ */
 export interface PayslipDetail {
   basePay: number;
   overtimePay: number;
@@ -49,9 +59,14 @@ export interface PayslipDetail {
   hoursAudited: number;
 }
 
-// 6. Safety Grievance
+/**
+ * Severity tier classification for workplace safety grievances.
+ */
 export type GrievanceSeverity = 'CRITICAL' | 'ELEVATED' | 'ROUTINE';
 
+/**
+ * Sanitized workplace grievance record with cryptographic anonymity and statutory violation mapping.
+ */
 export interface SafetyGrievance {
   id: string;
   isRedacted: boolean;
@@ -62,9 +77,14 @@ export interface SafetyGrievance {
   suggestedAction: string;
 }
 
-// 7. Fatigue Metric
+/**
+ * Tri-state fatigue risk classification based on circadian and weekly shift volume thresholds.
+ */
 export type FatigueLevel = 'OPTIMAL' | 'WARNING' | 'DANGER';
 
+/**
+ * Physiological strain score, fatigue level, and mandatory rest lockout protocol.
+ */
 export interface FatigueMetric {
   score: number;
   level: FatigueLevel;
@@ -73,13 +93,18 @@ export interface FatigueMetric {
   mandatedRestHours: number;
 }
 
-// 8. Skill Passport
+/**
+ * Individual industry-accredited skill badge with certified hours and issuer details.
+ */
 export interface VerifiedBadge {
   title: string;
   hoursCompleted: number;
   certifiedBy: string;
 }
 
+/**
+ * Portable W3C-aligned verifiable digital skill passport for cross-employer workforce mobility.
+ */
 export interface SkillPassport {
   workerId: string;
   digitalCredentialId: string;
@@ -92,7 +117,9 @@ export interface SkillPassport {
   nextRecommendedMilestone: string;
 }
 
-// 9. FairShift Intel Response
+/**
+ * Unified intelligence response payload returned by the FairShift analytics engine.
+ */
 export interface FairShiftIntelResponse {
   meta: {
     industry: Industry;
@@ -114,7 +141,9 @@ export interface FairShiftIntelResponse {
   };
 }
 
-// Optional granular helper interfaces for downstream consumption
+/**
+ * Plant management workforce analytics, attrition risk forecasting, and mitigation checklist.
+ */
 export interface EmployerInsights {
   attritionRiskPercentage: number;
   complianceScore?: number;
@@ -124,6 +153,9 @@ export interface EmployerInsights {
   actionChecklist: string[];
 }
 
+/**
+ * Metadata detailing evaluation timestamp, industry domain, and UN SDG alignment.
+ */
 export interface IntelMeta {
   industry: Industry;
   evaluatedAt: string;
@@ -131,7 +163,9 @@ export interface IntelMeta {
   complianceIndex: number;
 }
 
-// Backward compatibility types for existing legacy modules
+/**
+ * Audit finding item highlighting statutory violation, severity, and remediation recommendation.
+ */
 export interface Finding {
   title: string;
   severity: 'high' | 'medium' | 'low';
@@ -140,12 +174,18 @@ export interface Finding {
   sdgTargetRef: string;
 }
 
+/**
+ * Stepwise remediation action item with projected operational and compliance impact.
+ */
 export interface ActionStep {
   step: number;
   action: string;
   impact: string;
 }
 
+/**
+ * Aggregated analysis response supporting legacy visualization components.
+ */
 export interface AnalysisResponse {
   overallScore: number;
   status: 'Critical' | 'Warning' | 'Compliant';
@@ -155,6 +195,9 @@ export interface AnalysisResponse {
   generatedDocument: string;
 }
 
+/**
+ * Scenario definition for predefined hackathon and testing demonstration profiles.
+ */
 export interface DemoScenario {
   id: string;
   title: string;

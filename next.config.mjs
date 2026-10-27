@@ -1,4 +1,12 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+  compress: true,
+  poweredByHeader: false,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
+  },
+};
 
 export default nextConfig;

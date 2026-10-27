@@ -1,13 +1,32 @@
 import React from "react";
-import { ShieldAlert, ShieldCheck, AlertTriangle } from "lucide-react";
+import { ShieldAlert, ShieldCheck, AlertTriangle, LucideIcon } from "lucide-react";
 
-interface ScoreMeterProps {
+/**
+ * Interface defining properties for the ScoreMeter circular gauge component.
+ */
+export interface ScoreMeterProps {
+  /** Numeric statutory compliance score out of 100. */
   score: number;
+  /** Categorical status level for compliance rating. */
   status: "Critical" | "Warning" | "Compliant";
+  /** Optional loading state rendering evaluation pulse placeholder. */
   isLoading?: boolean;
 }
 
-export function ScoreMeter({ score, status, isLoading = false }: ScoreMeterProps) {
+/**
+ * ScoreMeter Component
+ *
+ * Renders an animated SVG circular gauge displaying statutory audit rating,
+ * color-coded status badges, and explanatory baseline alignment narratives.
+ *
+ * @param props - Component configuration properties adhering to {@link ScoreMeterProps}.
+ * @returns The rendered circular score meter.
+ */
+export function ScoreMeter({
+  score,
+  status,
+  isLoading = false,
+}: ScoreMeterProps): React.JSX.Element {
   // SVG circular gauge math
   const size = 160;
   const strokeWidth = 12;
@@ -16,7 +35,13 @@ export function ScoreMeter({ score, status, isLoading = false }: ScoreMeterProps
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
-  const getStatusColor = () => {
+  const getStatusColor = (): {
+    stroke: string;
+    text: string;
+    bg: string;
+    border: string;
+    icon: LucideIcon;
+  } => {
     switch (status) {
       case "Critical":
         return {
@@ -123,4 +148,5 @@ export function ScoreMeter({ score, status, isLoading = false }: ScoreMeterProps
     </div>
   );
 }
+
 export default ScoreMeter;

@@ -3,27 +3,46 @@
 import React, { useState, useRef } from "react";
 import { UploadCloud, CheckCircle2, X } from "lucide-react";
 
-interface DropzoneProps {
+/**
+ * Interface defining properties for the Dropzone file upload component.
+ */
+export interface DropzoneProps {
+  /** Callback fired when a file is loaded or extracted. */
   onFileLoaded: (filename: string, content?: string) => void;
+  /** Active file name currently attached, or null if empty. */
   activeFile: string | null;
+  /** Callback fired when the active file is removed. */
   onClearFile: () => void;
 }
 
-export function Dropzone({ onFileLoaded, activeFile, onClearFile }: DropzoneProps) {
-  const [isDragOver, setIsDragOver] = useState(false);
+/**
+ * Dropzone Component
+ *
+ * Provides a drag-and-drop document upload target supporting text, markdown,
+ * CSV, and simulated PDF/DOCX audit policy ingestion.
+ *
+ * @param props - Component configuration properties adhering to {@link DropzoneProps}.
+ * @returns The rendered Dropzone upload interface.
+ */
+export function Dropzone({
+  onFileLoaded,
+  activeFile,
+  onClearFile,
+}: DropzoneProps): React.JSX.Element {
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     setIsDragOver(true);
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     setIsDragOver(false);
   };
 
-  const processFile = (file: File) => {
+  const processFile = (file: File): void => {
     const filename = file.name;
     const isTextReadable =
       filename.endsWith(".txt") ||
@@ -33,8 +52,8 @@ export function Dropzone({ onFileLoaded, activeFile, onClearFile }: DropzoneProp
 
     if (isTextReadable) {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target?.result as string;
+      reader.onload = (event: ProgressEvent<FileReader>): void => {
+        const text = (event.target?.result as string) || "";
         onFileLoaded(filename, text);
       };
       reader.readAsText(file);
@@ -49,7 +68,7 @@ export function Dropzone({ onFileLoaded, activeFile, onClearFile }: DropzoneProp
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     setIsDragOver(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
@@ -57,7 +76,7 @@ export function Dropzone({ onFileLoaded, activeFile, onClearFile }: DropzoneProp
     }
   };
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     if (e.target.files && e.target.files[0]) {
       processFile(e.target.files[0]);
     }
@@ -122,4 +141,5 @@ export function Dropzone({ onFileLoaded, activeFile, onClearFile }: DropzoneProp
     </div>
   );
 }
+
 export default Dropzone;

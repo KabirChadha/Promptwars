@@ -2,14 +2,27 @@ import React from "react";
 import { ActionStep } from "@/lib/types";
 import { Zap } from "lucide-react";
 
-interface ActionPlanProps {
+/**
+ * Interface defining properties for the ActionPlan component.
+ */
+export interface ActionPlanProps {
+  /** Array of stepwise remediation action items. */
   actionPlan: ActionStep[];
 }
 
-export function ActionPlan({ actionPlan }: ActionPlanProps) {
+/**
+ * ActionPlan Component
+ *
+ * Renders an ordered series of prioritized mitigation steps with projected
+ * operational and compliance impacts for plant supervisors.
+ *
+ * @param props - Component configuration properties adhering to {@link ActionPlanProps}.
+ * @returns The rendered ActionPlan list view.
+ */
+export function ActionPlan({ actionPlan }: ActionPlanProps): React.JSX.Element {
   return (
     <div className="space-y-3.5">
-      {actionPlan.map((stepItem) => (
+      {actionPlan.map((stepItem: ActionStep) => (
         <div
           key={stepItem.step}
           className="flex flex-col sm:flex-row sm:items-start gap-4 p-4 rounded-xl bg-zinc-900 border border-zinc-800/80 hover:border-zinc-700/80 transition-all"
@@ -37,4 +50,5 @@ export function ActionPlan({ actionPlan }: ActionPlanProps) {
     </div>
   );
 }
+
 export default ActionPlan;

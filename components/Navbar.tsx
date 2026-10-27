@@ -2,7 +2,15 @@ import React from "react";
 import Link from "next/link";
 import { ShieldCheck, Activity, Award } from "lucide-react";
 
-export function Navbar() {
+/**
+ * Global Top Navigation Bar Component
+ *
+ * Renders the persistent branding, live operational engine status indicator,
+ * hackathon metadata badges, and GitHub repository reference link.
+ *
+ * @returns The rendered sticky top navigation bar.
+ */
+export function Navbar(): React.JSX.Element {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -81,4 +89,5 @@ export function Navbar() {
     </header>
   );
 }
+
 export default Navbar;
