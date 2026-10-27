@@ -330,31 +330,136 @@ export async function POST(req: NextRequest) {
         ? "Heavy Earthmoving Equipment Specialist (HEMM-2) Certification"
         : "Green Building Biohazard Management & Supervisory Lead";
 
-    // Employer Insights
-    const attritionRiskPercentage =
-      fatigueLevel === "DANGER" ? 68 : fatigueLevel === "WARNING" ? 42 : 12;
+    // 7. Dynamic Compliance & Health Index Calculation:
+    let baseCompliance = 98;
 
-    const clusterRootCause =
-      payload.industry === "construction"
-        ? "High overtime fatigue coupling with unaddressed electrical/scaffold safety hazards creates peak 30-day voluntary turnover risk."
-        : "Insufficient chemical-handling PPE and weekend night shift clustering drive avoidable absenteeism and high onboarding churn.";
+    // Deductions:
+    // If consecutiveDays >= 7: deduct 26 points (Mandatory weekly rest day violation).
+    // Else if consecutiveDays >= 6: deduct 12 points.
+    if (payload.consecutiveDays >= 7) {
+      baseCompliance -= 26;
+    } else if (payload.consecutiveDays >= 6) {
+      baseCompliance -= 12;
+    }
 
-    const actionChecklist =
-      payload.industry === "construction"
-        ? [
-            "Deploy automated 12-hour mandatory inter-shift lockout on biometric attendance gates.",
-            "Mandate daily morning safety huddle & scaffold tag verification with certified supervisor sign-off.",
-            "Audit sub-contractor payslips to enforce 2x overtime rate under Indian Factories Act.",
-          ]
-        : [
-            "Restock certified nitrile gloves and organic vapor half-masks at all custodial storage bays.",
-            "Transition custodial night rosters to rotating 4-day work blocks to mitigate fatigue.",
-            "Publish transparent multilingual payslips weekly via WhatsApp/SMS to prevent dispute escalation.",
-          ];
+    // If totalWeeklyHours > 60: deduct 22 points (Severe overtime overload).
+    // Else if totalWeeklyHours > 48: deduct 10 points (Standard weekly ceiling exceeded).
+    if (totalWeeklyHours > 60) {
+      baseCompliance -= 22;
+    } else if (totalWeeklyHours > 48) {
+      baseCompliance -= 10;
+    }
 
-    // Compliance Index
-    const complianceIndex =
-      fatigueLevel === "DANGER" ? 48 : fatigueLevel === "WARNING" ? 72 : 94;
+    // If overtimeHours > 15: deduct 12 points.
+    if (payload.overtimeHours > 15) {
+      baseCompliance -= 12;
+    }
+
+    // If raw incident notes contain safety keywords: deduct 14 points.
+    const safetyKeywords = [
+      "hazard",
+      "scaffold",
+      "acid",
+      "wire",
+      "electrocution",
+      "sparks",
+      "fall",
+      "injury",
+    ];
+    const rawGrievanceLower = (payload.grievanceRawText || "").toLowerCase();
+    const hasSafetyKeywords = safetyKeywords.some((keyword) =>
+      rawGrievanceLower.includes(keyword)
+    );
+    if (hasSafetyKeywords) {
+      baseCompliance -= 14;
+    }
+
+    // Clamp complianceIndex = Math.max(22, Math.min(98, baseCompliance))
+    const complianceIndex = Math.max(22, Math.min(98, baseCompliance));
+
+    // Set complianceTier:
+    // complianceIndex < 60: 'CRITICAL RISK' (Color: red)
+    // complianceIndex < 80: 'ELEVATED RISK' (Color: amber)
+    // Else: 'OPTIMAL / COMPLIANT' (Color: green)
+    let complianceTier = "OPTIMAL / COMPLIANT";
+    if (complianceIndex < 60) {
+      complianceTier = "CRITICAL RISK";
+    } else if (complianceIndex < 80) {
+      complianceTier = "ELEVATED RISK";
+    }
+
+    // Dynamic 30-Day Attrition Risk:
+    // attritionPercentage = Math.min(88, Math.max(8, Math.round(100 - complianceIndex + (payload.overtimeHours * 0.8))))
+    const attritionPercentage = Math.min(
+      88,
+      Math.max(8, Math.round(100 - complianceIndex + payload.overtimeHours * 0.8))
+    );
+
+    // Unique Worker-Specific Drivers & Diagnostic Root Causes
+    const idUpper = (payload.workerId || "").toUpperCase();
+    const nameUpper = (payload.workerName || "").toUpperCase();
+
+    let driverText = "";
+    let rootCauseText = "";
+    let dynamicChecklist: string[] = [];
+
+    if (idUpper.includes("7492") || nameUpper.includes("SURESH")) {
+      driverText = `Drivers: High-voltage electrocution exposure near Scaffold Tower 3 combined with ${payload.consecutiveDays} continuous unrotated shifts.`;
+      rootCauseText = `Structural Root Cause: Subcontractor concrete pouring timeline pressure overriding wet-weather electrical safety protocols.`;
+      dynamicChecklist = [
+        "Immediate grounding isolation & safety tag inspection at Scaffold Tower 3.",
+        "Enforce wet-weather electrical safety protocol and mandatory supervisor sign-off.",
+        "Deploy automated 12-hour mandatory inter-shift lockout on biometric attendance gates.",
+      ];
+    } else if (idUpper.includes("VARMA") || idUpper.includes("2841") || nameUpper.includes("RAJESH")) {
+      driverText = `Drivers: Unpaid night-shift premium discrepancies and uncompensated ${payload.overtimeHours} overtime hours creating acute wage friction.`;
+      rootCauseText = `Structural Root Cause: Disconnect between biometric punch logs and subcontractor manual payroll spreadsheets.`;
+      dynamicChecklist = [
+        "Reconcile biometric punch logs with subcontractor manual payroll spreadsheets.",
+        "Disburse retroactive 2x statutory overtime arrears under Indian Factories Act Section 59.",
+        "Publish transparent vernacular digital payslip with itemized night-shift premium.",
+      ];
+    } else if (idUpper.includes("ANIL") || idUpper.includes("9104") || nameUpper.includes("ANIL")) {
+      driverText = `Drivers: Micro-sleep risk and severe operator fatigue during high-elevation crane maneuvers after ${payload.shiftHours * payload.consecutiveDays} accumulated hours.`;
+      rootCauseText = `Structural Root Cause: Single-operator redundancy deficit for specialized heavy machinery during monsoon acceleration.`;
+      dynamicChecklist = [
+        "Activate single-operator crane redundancy protocol and roster secondary licensed operator.",
+        "Enforce mandatory 24-hour physiological rest lockout prior to high-elevation crane operations.",
+        "Install temperature-regulated crane cabin amenities and real-time alertness monitors.",
+      ];
+    } else if (idUpper.includes("PRIYA") || idUpper.includes("3011") || nameUpper.includes("PRIYA")) {
+      driverText = `Drivers: Direct dermal chemical exposure risks from missing heavy-duty nitrile gloves during acid floor scrubbing.`;
+      rootCauseText = `Structural Root Cause: Central procurement stockout of industrial PPE supplies in campus hostel maintenance blocks.`;
+      dynamicChecklist = [
+        "Emergency requisition of heavy-duty chemical-resistant nitrile gloves and organic vapor half-masks.",
+        "Install localized eyewash safety stations in chemistry and hostel custodial blocks.",
+        "Enforce mandatory hazardous chemical handling SOPs and worker refusal rights.",
+      ];
+    } else if (idUpper.includes("DEEPAK") || idUpper.includes("5120") || nameUpper.includes("DEEPAK")) {
+      driverText = `Drivers: Thermal kitchen exhaustion and dehydration during continuous ${payload.consecutiveDays}-day peak dining hall service cycles.`;
+      rootCauseText = `Structural Root Cause: Student intake surge without proportional scaling of auxiliary mess catering staff.`;
+      dynamicChecklist = [
+        "Scale auxiliary mess catering staff by 35% during peak student examination service cycles.",
+        "Repair non-functional commercial kitchen exhaust hoods and ventilation systems.",
+        "Institute structured hydration breaks and enforce maximum 8-hour shift limits for culinary staff.",
+      ];
+    } else {
+      // Fallback (Custom edits): Dynamically synthesize based on hours
+      driverText = `Drivers: ${payload.consecutiveDays >= 7 ? "Zero weekly rest days" : "Shift load"} combined with ${payload.overtimeHours}h overtime and logged on-site grievances.`;
+      rootCauseText = `Structural Root Cause: Roster over-allocation and pending workplace remediation protocols.`;
+      dynamicChecklist =
+        payload.industry === "construction"
+          ? [
+              "Deploy automated 12-hour mandatory inter-shift lockout on biometric attendance gates.",
+              "Mandate daily morning safety huddle & scaffold tag verification with certified supervisor sign-off.",
+              "Audit sub-contractor payslips to enforce 2x overtime rate under Indian Factories Act.",
+            ]
+          : [
+              "Restock certified nitrile gloves and organic vapor half-masks at all custodial storage bays.",
+              "Transition custodial night rosters to rotating 4-day work blocks to mitigate fatigue.",
+              "Publish transparent multilingual payslips weekly via WhatsApp/SMS to prevent dispute escalation.",
+            ];
+    }
 
     const meta = {
       industry: payload.industry,
@@ -401,9 +506,12 @@ export async function POST(req: NextRequest) {
         nextRecommendedMilestone,
       },
       employerInsights: {
-        attritionRiskPercentage,
-        clusterRootCause,
-        actionChecklist,
+        attritionRiskPercentage: attritionPercentage,
+        complianceScore: complianceIndex,
+        riskTier: complianceTier,
+        driverSummary: driverText,
+        clusterRootCause: rootCauseText,
+        actionChecklist: dynamicChecklist,
       },
       // Backward-compatible fields for legacy UI components
       overallScore: complianceIndex,
@@ -425,7 +533,7 @@ export async function POST(req: NextRequest) {
           sdgTargetRef: "Target 8.5: Decent working hours & rest mandates",
         },
       ],
-      actionPlan: actionChecklist.map((act, index) => ({
+      actionPlan: dynamicChecklist.map((act: string, index: number) => ({
         step: index + 1,
         action: act,
         impact: `Mitigates workforce attrition and enhances Target 8.8 compliance index by +${15 - index * 3} points.`,
@@ -514,6 +622,9 @@ export async function POST(req: NextRequest) {
       },
       employerInsights: {
         attritionRiskPercentage: 12,
+        complianceScore: 72,
+        riskTier: "ELEVATED RISK",
+        driverSummary: "Drivers: Baseline shift load with standard statutory rest cycles.",
         clusterRootCause: "Standard workforce baseline operations.",
         actionChecklist: [
           "Deploy automated 12-hour mandatory inter-shift lockout on biometric attendance gates.",

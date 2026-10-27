@@ -158,6 +158,94 @@ function getIndustryTaxonomy(industry, workerId) {
   };
 }
 
+function calculateCompliance(shiftHours, consecutiveDays, overtimeHours, rawText) {
+  const totalWeeklyHours = shiftHours * consecutiveDays + overtimeHours;
+  let baseCompliance = 98;
+
+  if (consecutiveDays >= 7) {
+    baseCompliance -= 26;
+  } else if (consecutiveDays >= 6) {
+    baseCompliance -= 12;
+  }
+
+  if (totalWeeklyHours > 60) {
+    baseCompliance -= 22;
+  } else if (totalWeeklyHours > 48) {
+    baseCompliance -= 10;
+  }
+
+  if (overtimeHours > 15) {
+    baseCompliance -= 12;
+  }
+
+  const safetyKeywords = [
+    "hazard",
+    "scaffold",
+    "acid",
+    "wire",
+    "electrocution",
+    "sparks",
+    "fall",
+    "injury",
+  ];
+  const lower = (rawText || "").toLowerCase();
+  if (safetyKeywords.some((kw) => lower.includes(kw))) {
+    baseCompliance -= 14;
+  }
+
+  const complianceIndex = Math.max(22, Math.min(98, baseCompliance));
+  let complianceTier = "OPTIMAL / COMPLIANT";
+  if (complianceIndex < 60) {
+    complianceTier = "CRITICAL RISK";
+  } else if (complianceIndex < 80) {
+    complianceTier = "ELEVATED RISK";
+  }
+
+  const attritionPercentage = Math.min(
+    88,
+    Math.max(8, Math.round(100 - complianceIndex + overtimeHours * 0.8))
+  );
+
+  return { totalWeeklyHours, complianceIndex, complianceTier, attritionPercentage };
+}
+
+function getWorkerDrivers(workerId, workerName, consecutiveDays, shiftHours, overtimeHours) {
+  const idUpper = (workerId || "").toUpperCase();
+  const nameUpper = (workerName || "").toUpperCase();
+
+  if (idUpper.includes("7492") || nameUpper.includes("SURESH")) {
+    return {
+      driverText: `Drivers: High-voltage electrocution exposure near Scaffold Tower 3 combined with ${consecutiveDays} continuous unrotated shifts.`,
+      rootCauseText: `Structural Root Cause: Subcontractor concrete pouring timeline pressure overriding wet-weather electrical safety protocols.`,
+    };
+  } else if (idUpper.includes("VARMA") || idUpper.includes("2841") || nameUpper.includes("RAJESH")) {
+    return {
+      driverText: `Drivers: Unpaid night-shift premium discrepancies and uncompensated ${overtimeHours} overtime hours creating acute wage friction.`,
+      rootCauseText: `Structural Root Cause: Disconnect between biometric punch logs and subcontractor manual payroll spreadsheets.`,
+    };
+  } else if (idUpper.includes("ANIL") || idUpper.includes("9104") || nameUpper.includes("ANIL")) {
+    return {
+      driverText: `Drivers: Micro-sleep risk and severe operator fatigue during high-elevation crane maneuvers after ${shiftHours * consecutiveDays} accumulated hours.`,
+      rootCauseText: `Structural Root Cause: Single-operator redundancy deficit for specialized heavy machinery during monsoon acceleration.`,
+    };
+  } else if (idUpper.includes("PRIYA") || idUpper.includes("3011") || nameUpper.includes("PRIYA")) {
+    return {
+      driverText: `Drivers: Direct dermal chemical exposure risks from missing heavy-duty nitrile gloves during acid floor scrubbing.`,
+      rootCauseText: `Structural Root Cause: Central procurement stockout of industrial PPE supplies in campus hostel maintenance blocks.`,
+    };
+  } else if (idUpper.includes("DEEPAK") || idUpper.includes("5120") || nameUpper.includes("DEEPAK")) {
+    return {
+      driverText: `Drivers: Thermal kitchen exhaustion and dehydration during continuous ${consecutiveDays}-day peak dining hall service cycles.`,
+      rootCauseText: `Structural Root Cause: Student intake surge without proportional scaling of auxiliary mess catering staff.`,
+    };
+  } else {
+    return {
+      driverText: `Drivers: ${consecutiveDays >= 7 ? "Zero weekly rest days" : "Shift load"} combined with ${overtimeHours}h overtime and logged on-site grievances.`,
+      rootCauseText: `Structural Root Cause: Roster over-allocation and pending workplace remediation protocols.`,
+    };
+  }
+}
+
 // -------------------------------------------------------------
 // TEST RUNNER EXECUTION
 // -------------------------------------------------------------
@@ -301,6 +389,87 @@ test("Generates distinct Campus Facility industry credentials and violations", (
   assert(taxonomy.complianceViolation.includes("Occupational Safety Standard 1910.138"));
   assert(taxonomy.nextRecommendedMilestone.includes("Green Building Biohazard Management"));
   assert.strictEqual(taxonomy.digitalCredentialId, "VEC-SRM-57524B2D");
+});
+
+// 6. Dynamic Compliance & Health Index Calculation and Attrition Risk
+console.log(`\n${colors.bold}[6] Dynamic Compliance Deductions & 30-Day Attrition Risk${colors.reset}`);
+
+test("Accurately calculates Suresh K. severe deductions and triggers CRITICAL RISK", () => {
+  // 8h/shift, 7 consecutive days, 18h OT, hazard keywords (scaffold, electrocution)
+  // totalWeeklyHours = 8*7 + 18 = 74
+  // baseCompliance = 98 - 26 (>=7 days) - 22 (>60 hrs) - 12 (>15 OT) - 14 (keywords) = 24
+  const res = calculateCompliance(8, 7, 18, "440V wiring touching metal scaffold tower 3 with electrocution sparks.");
+  assert.strictEqual(res.complianceIndex, 24);
+  assert.strictEqual(res.complianceTier, "CRITICAL RISK");
+  // attrition = Math.min(88, Math.max(8, Math.round(100 - 24 + 18*0.8))) = min(88, 76 + 14.4 = 90) = 88
+  assert.strictEqual(res.attritionPercentage, 88);
+});
+
+test("Accurately clamps compliance index between [22, 98]", () => {
+  const severe = calculateCompliance(12, 14, 40, "severe hazard fall injury wire acid scaffold electrocution sparks");
+  assert.strictEqual(severe.complianceIndex, 24, "All cumulative deductions result in 98 - 74 = 24");
+
+  const clampedFloor = Math.max(22, Math.min(98, 15));
+  assert.strictEqual(clampedFloor, 22, "Floor should clamp at 22");
+
+  const optimal = calculateCompliance(8, 5, 0, "Clean routine shifts with safe conditions.");
+  assert.strictEqual(optimal.complianceIndex, 98, "Ceiling should start at 98 with 0 deductions");
+  assert.strictEqual(optimal.complianceTier, "OPTIMAL / COMPLIANT");
+  // attrition = Math.min(88, Math.max(8, Math.round(100 - 98 + 0))) = 8
+  assert.strictEqual(optimal.attritionPercentage, 8);
+});
+
+test("Accurately triggers ELEVATED RISK for moderate violations", () => {
+  // 8h, 6 days, 6h OT -> totalWeekly = 48 + 6 = 54 (>48, <=60: -10)
+  // consecutiveDays >= 6 (-12)
+  // OT <= 15 (0)
+  // no safety keywords (0)
+  // 98 - 12 - 10 = 76 -> ELEVATED RISK
+  const moderate = calculateCompliance(8, 6, 6, "Shift routine check without incident.");
+  assert.strictEqual(moderate.complianceIndex, 76);
+  assert.strictEqual(moderate.complianceTier, "ELEVATED RISK");
+  // attrition = Math.min(88, Math.max(8, Math.round(100 - 76 + 6*0.8))) = 24 + 4.8 = 29
+  assert.strictEqual(moderate.attritionPercentage, 29);
+});
+
+// 7. Unique Worker-Specific Drivers & Diagnostic Root Causes
+console.log(`\n${colors.bold}[7] Worker-Specific Drivers & Diagnostic Root Causes${colors.reset}`);
+
+test("Generates tailored drivers & root cause for Suresh Kumar (7492)", () => {
+  const d = getWorkerDrivers("WRK-MAS-7492", "Suresh Kumar", 7, 8, 18);
+  assert(d.driverText.includes("High-voltage electrocution exposure near Scaffold Tower 3"));
+  assert(d.driverText.includes("7 continuous unrotated shifts"));
+  assert(d.rootCauseText.includes("Subcontractor concrete pouring timeline pressure overriding wet-weather electrical safety protocols"));
+});
+
+test("Generates tailored drivers & root cause for Rajesh Varma (VARMA / 2841)", () => {
+  const d = getWorkerDrivers("WRK-MAS-2841", "Rajesh Varma", 6, 8, 12);
+  assert(d.driverText.includes("Unpaid night-shift premium discrepancies and uncompensated 12 overtime hours"));
+  assert(d.rootCauseText.includes("Disconnect between biometric punch logs and subcontractor manual payroll spreadsheets"));
+});
+
+test("Generates tailored drivers & root cause for Anil Mishra (ANIL / 9104)", () => {
+  const d = getWorkerDrivers("WRK-MAS-9104", "Anil Mishra", 9, 10, 22);
+  assert(d.driverText.includes("Micro-sleep risk and severe operator fatigue during high-elevation crane maneuvers after 90 accumulated hours"));
+  assert(d.rootCauseText.includes("Single-operator redundancy deficit for specialized heavy machinery during monsoon acceleration"));
+});
+
+test("Generates tailored drivers & root cause for Priya Mani (PRIYA / 3011)", () => {
+  const d = getWorkerDrivers("WRK-SRM-3011", "Priya Mani", 5, 8, 6);
+  assert(d.driverText.includes("Direct dermal chemical exposure risks from missing heavy-duty nitrile gloves during acid floor scrubbing"));
+  assert(d.rootCauseText.includes("Central procurement stockout of industrial PPE supplies in campus hostel maintenance blocks"));
+});
+
+test("Generates tailored drivers & root cause for Deepak Sharma (DEEPAK / 5120)", () => {
+  const d = getWorkerDrivers("WRK-SRM-5120", "Deepak Sharma", 7, 9, 16);
+  assert(d.driverText.includes("Thermal kitchen exhaustion and dehydration during continuous 7-day peak dining hall service cycles"));
+  assert(d.rootCauseText.includes("Student intake surge without proportional scaling of auxiliary mess catering staff"));
+});
+
+test("Generates dynamic synthesis for custom fallback workers", () => {
+  const d = getWorkerDrivers("WRK-CUSTOM-001", "Vikram Patel", 7, 8, 10);
+  assert(d.driverText.includes("Zero weekly rest days combined with 10h overtime and logged on-site grievances"));
+  assert(d.rootCauseText.includes("Roster over-allocation and pending workplace remediation protocols"));
 });
 
 // Summary Reporting

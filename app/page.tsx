@@ -1699,32 +1699,33 @@ export default function FairShiftDashboard() {
                   <div className="flex items-baseline gap-1">
                     <span
                       className={`text-5xl font-extrabold ${
-                        (intelResult?.meta?.complianceIndex ?? 48) < 60
+                        (intelResult?.employerInsights?.complianceScore ?? intelResult?.meta?.complianceIndex ?? 48) < 60
                           ? "text-red-400"
-                          : (intelResult?.meta?.complianceIndex ?? 48) < 80
+                          : (intelResult?.employerInsights?.complianceScore ?? intelResult?.meta?.complianceIndex ?? 48) < 80
                           ? "text-amber-400"
                           : "text-emerald-400"
                       }`}
                     >
-                      {intelResult?.meta?.complianceIndex ?? 48}
+                      {intelResult?.employerInsights?.complianceScore ?? intelResult?.meta?.complianceIndex ?? 48}
                     </span>
                     <span className="text-sm font-mono text-zinc-400">/ 100</span>
                   </div>
 
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                      (intelResult?.meta?.complianceIndex ?? 48) < 60
+                      (intelResult?.employerInsights?.complianceScore ?? intelResult?.meta?.complianceIndex ?? 48) < 60
                         ? "bg-red-500/15 text-red-400 border border-red-500/30"
-                        : (intelResult?.meta?.complianceIndex ?? 48) < 80
+                        : (intelResult?.employerInsights?.complianceScore ?? intelResult?.meta?.complianceIndex ?? 48) < 80
                         ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
                         : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
                     }`}
                   >
-                    {(intelResult?.meta?.complianceIndex ?? 48) < 60
-                      ? t.criticalRating
-                      : (intelResult?.meta?.complianceIndex ?? 48) < 80
-                      ? t.warningRating
-                      : t.compliantRating}
+                    {intelResult?.employerInsights?.riskTier ||
+                      ((intelResult?.employerInsights?.complianceScore ?? intelResult?.meta?.complianceIndex ?? 48) < 60
+                        ? "CRITICAL RISK"
+                        : (intelResult?.employerInsights?.complianceScore ?? intelResult?.meta?.complianceIndex ?? 48) < 80
+                        ? "ELEVATED RISK"
+                        : "OPTIMAL / COMPLIANT")}
                   </span>
                 </div>
 
@@ -1813,20 +1814,22 @@ export default function FairShiftDashboard() {
                   </div>
                   <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-amber-500 to-red-500 rounded-full"
+                      className="h-full bg-gradient-to-r from-amber-500 to-red-500 rounded-full transition-all duration-500"
                       style={{
                         width: `${intelResult?.employerInsights?.attritionRiskPercentage ?? 68}%`,
                       }}
                     />
                   </div>
-                  <span className="text-[11px] text-zinc-400 block pt-1">
-                    {t.attritionDrivers}
-                  </span>
+                  <div className="pt-1.5 border-t border-zinc-900">
+                    <span className="text-[11px] text-zinc-300 block leading-relaxed font-mono">
+                      {intelResult?.employerInsights?.driverSummary || t.attritionDrivers}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Root Cause Narrative */}
                 <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1.5">
-                  <span className="text-[10px] font-mono uppercase text-zinc-400 block font-semibold">
+                  <span className="text-[10px] font-mono uppercase text-orange-400 block font-semibold">
                     {t.rootCauseTitle}
                   </span>
                   <p className="text-xs text-zinc-200 leading-relaxed">

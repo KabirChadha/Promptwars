@@ -106,6 +106,9 @@ export interface FairShiftIntelResponse {
   skillPassport: SkillPassport;
   employerInsights: {
     attritionRiskPercentage: number;
+    complianceScore?: number;
+    riskTier?: string;
+    driverSummary?: string;
     clusterRootCause: string;
     actionChecklist: string[];
   };
@@ -114,6 +117,9 @@ export interface FairShiftIntelResponse {
 // Optional granular helper interfaces for downstream consumption
 export interface EmployerInsights {
   attritionRiskPercentage: number;
+  complianceScore?: number;
+  riskTier?: string;
+  driverSummary?: string;
   clusterRootCause: string;
   actionChecklist: string[];
 }
