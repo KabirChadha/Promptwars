@@ -1,0 +1,13 @@
+.git
+node_modules
+.next
+__tests__
+.env*
+*.log
+coverage
+.DS_Store
+*.pem
+*.tsbuildinfo
+Dockerfile
+.dockerignore
+README.md

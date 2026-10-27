@@ -18,13 +18,13 @@ export function Navbar() {
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-base tracking-tight text-zinc-50 group-hover:text-orange-400 transition-colors flex items-center gap-1.5">
-                  SDG 8 Engine
-                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700/60">
-                    v1.0
+                  FairShift
+                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30">
+                    PRO
                   </span>
                 </span>
                 <span className="text-[11px] text-zinc-400 font-medium">
-                  Decent Work & Economic Growth
+                  UN SDG 8 Intelligence Engine
                 </span>
               </div>
             </Link>
@@ -35,7 +35,7 @@ export function Navbar() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
               </span>
-              <span className="tracking-wide">SDG 8 Engine • Live</span>
+              <span className="tracking-wide">FairShift • Active Engine</span>
             </div>
           </div>
 
